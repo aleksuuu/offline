@@ -1,8 +1,6 @@
 /**
  @file
- fadebuf~ - SDK example of an object which accesses an MSP buffer~
-
- @ingroup    examples
+ fadebuf~
  */
 
 #include "ext.h"
@@ -177,6 +175,7 @@ void fadebuf_bang(t_fadebuf *x)
         }
         tab[curr_samp] *= i / (float)fade_out_samps;
     }
+    
     buffer_setdirty(buffer);
     buffer_unlocksamples(buffer);
     outlet_bang(x->f_outlet1);
