@@ -1,6 +1,6 @@
 /**
  @file
- fadebuf
+ stripsilence
  */
 
 #include "ext.h"
@@ -8,7 +8,7 @@
 //#include "ext_common.h" // contains CLAMP macro
 #include "ext_buffer.h"
 
-typedef struct _fadebuf {
+typedef struct _stripsilence {
     t_object f_obj;
     t_buffer_ref *f_buffer_reference;
     double f_fade_in_time; // in ms
@@ -20,43 +20,43 @@ typedef struct _fadebuf {
     void *f_proxy3;
     long f_inletnum;
     void *f_outlet1;
-} t_fadebuf;
+} t_stripsilence;
 
-void fadebuf_set(t_fadebuf *x, t_symbol *s);
-void *fadebuf_new(t_symbol *s, long argc, t_atom *argv);
-void fadebuf_free(t_fadebuf *x);
-t_max_err fadebuf_notify(t_fadebuf *x, t_symbol *s, t_symbol *msg, void *sender, void *data);
-void fadebuf_int(t_fadebuf *x, long n);
+void stripsilence_set(t_stripsilence *x, t_symbol *s);
+void *stripsilence_new(t_symbol *s, long argc, t_atom *argv);
+void stripsilence_free(t_stripsilence *x);
+t_max_err stripsilence_notify(t_stripsilence *x, t_symbol *s, t_symbol *msg, void *sender, void *data);
+void stripsilence_int(t_stripsilence *x, long n);
 
-void fadebuf_int(t_fadebuf *x, long n);
-void fadebuf_float(t_fadebuf *x, double f);
-void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv);
+void stripsilence_int(t_stripsilence *x, long n);
+void stripsilence_float(t_stripsilence *x, double f);
+void stripsilence_list(t_stripsilence *x, t_symbol *s, long argc, t_atom *argv);
 
-void fadebuf_bang(t_fadebuf *x);
-void fadebuf_assist(t_fadebuf *x, void *b, long m, long a, char *s);
-void fadebuf_dblclick(t_fadebuf *x);
+void stripsilence_bang(t_stripsilence *x);
+void stripsilence_assist(t_stripsilence *x, void *b, long m, long a, char *s);
+void stripsilence_dblclick(t_stripsilence *x);
 
 
-static t_class *fadebuf_class;
+static t_class *stripsilence_class;
 
 
 C74_EXPORT void ext_main(void *r)
 {
-    t_class *c = class_new("fadebuf", (method)fadebuf_new, (method)fadebuf_free, sizeof(t_fadebuf), 0L, A_GIMME, 0);
-    class_addmethod(c, (method)fadebuf_set, "set", A_SYM, 0);
-    class_addmethod(c, (method)fadebuf_bang, "bang", 0);
-    class_addmethod(c, (method)fadebuf_int, "int", A_LONG, 0);
-    class_addmethod(c, (method)fadebuf_float, "float", A_FLOAT, 0);
-    class_addmethod(c, (method)fadebuf_list, "list", A_GIMME, 0);
-    class_addmethod(c, (method)fadebuf_assist, "assist", A_CANT, 0);
-    class_addmethod(c, (method)fadebuf_dblclick, "dblclick", A_CANT, 0);
-    class_addmethod(c, (method)fadebuf_notify, "notify", A_CANT, 0);
+    t_class *c = class_new("stripsilence", (method)stripsilence_new, (method)stripsilence_free, sizeof(t_stripsilence), 0L, A_GIMME, 0);
+    class_addmethod(c, (method)stripsilence_set, "set", A_SYM, 0);
+    class_addmethod(c, (method)stripsilence_bang, "bang", 0);
+    class_addmethod(c, (method)stripsilence_int, "int", A_LONG, 0);
+    class_addmethod(c, (method)stripsilence_float, "float", A_FLOAT, 0);
+    class_addmethod(c, (method)stripsilence_list, "list", A_GIMME, 0);
+    class_addmethod(c, (method)stripsilence_assist, "assist", A_CANT, 0);
+    class_addmethod(c, (method)stripsilence_dblclick, "dblclick", A_CANT, 0);
+    class_addmethod(c, (method)stripsilence_notify, "notify", A_CANT, 0);
     class_addmethod(c, (method)stdinletinfo, "inletinfo", A_CANT, 0); // marks all non-left inlets as cold
     class_register(CLASS_BOX, c);
-    fadebuf_class = c;
+    stripsilence_class = c;
 }
 
-void fadebuf_set(t_fadebuf *x, t_symbol *s)
+void stripsilence_set(t_stripsilence *x, t_symbol *s)
 {
     if (!x->f_buffer_reference)
         x->f_buffer_reference = buffer_ref_new((t_object *)x, s);
@@ -64,19 +64,19 @@ void fadebuf_set(t_fadebuf *x, t_symbol *s)
         buffer_ref_set(x->f_buffer_reference, s);
 }
 
-void fadebuf_int(t_fadebuf *x, long n)
+void stripsilence_int(t_stripsilence *x, long n)
 {
-    fadebuf_float(x, n);
+    stripsilence_float(x, n);
 }
 
-void fadebuf_float(t_fadebuf *x, double f)
+void stripsilence_float(t_stripsilence *x, double f)
 {
     switch (proxy_getinlet((t_object *)x))
     {
         case 0:
             x->f_fade_in_time = f;
             x->f_fade_out_time = f;
-            fadebuf_bang(x);
+            stripsilence_bang(x);
             break;
         case 1:
             x->f_fade_in_time = f;
@@ -91,7 +91,7 @@ void fadebuf_float(t_fadebuf *x, double f)
     }
 }
 
-void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv)
+void stripsilence_list(t_stripsilence *x, t_symbol *s, long argc, t_atom *argv)
 {
     if (argc != 2)
     {
@@ -102,7 +102,7 @@ void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv)
         case 0:
             atom_arg_getdouble(&x->f_fade_in_time, 0, argc, argv);
             atom_arg_getdouble(&x->f_fade_out_time, 1, argc, argv);
-            fadebuf_bang(x);
+            stripsilence_bang(x);
             break;
         case 1:
             atom_arg_getdouble(&x->f_fade_in_time, 0, argc, argv);
@@ -119,77 +119,87 @@ void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv)
 }
 
 
-void fadebuf_bang(t_fadebuf *x)
+void stripsilence_bang(t_stripsilence *x)
 {
     if (proxy_getinlet((t_object *)x != 0))
     {
         object_post((t_object *)x, "bang only works with the leftmost inlet");
         return;
     }
-    
+
     t_buffer_obj *buffer = buffer_ref_getobject(x->f_buffer_reference);
     float *tab = buffer_locksamples(buffer);
+//    float *new_samples = object_alloc(sizeof(tab));
+
     if (!tab)
     {
         object_post((t_object *)x, "buffer is empty");
         return;
     }
-    
+
     long    chan, frames, nc, fade_in_samps, fade_out_samps, total_samples,                           start_time_samps, end_time_samps;
     float   sample_rate;
-    
+
     frames = buffer_getframecount(buffer);
     nc = buffer_getchannelcount(buffer);
     total_samples = frames * nc;
     sample_rate = buffer_getmillisamplerate(buffer);
     fade_in_samps = x->f_fade_in_time * sample_rate * nc;
     fade_out_samps = x->f_fade_out_time * sample_rate * nc;
-    
+
     start_time_samps = x->f_start_time * sample_rate * nc;
     if (start_time_samps < 0 || start_time_samps > total_samples)
     {
         start_time_samps = 0;
     }
-    
+
     end_time_samps = x->f_end_time * sample_rate * nc;
     if (end_time_samps < 0 || end_time_samps > total_samples) // hasn't been set by user or out of bounds
     {
         end_time_samps = total_samples;
     }
+
+    long silent_samp_counter = 0;
+    long new_samp_count = 0;
     
-    for (long i = 0; i < fade_in_samps; i++)
+    float *new_samples = malloc(sizeof(float) * total_samples);
+
+    for (long i = 0; i < total_samples; i++)
     {
-        long curr_samp = i + start_time_samps;
-        if (curr_samp > total_samples)
+        if (tab[i] != 0 && silent_samp_counter > 4410)
         {
-            break;
+            new_samp_count -= silent_samp_counter;
+            silent_samp_counter = 0;
+        } else if (tab[i] == 0)
+        {
+            silent_samp_counter++;
         }
-        tab[curr_samp] *= i / (float)fade_in_samps;
+        new_samples[new_samp_count] = tab[i];
+        new_samp_count++;
     }
-    for (long i = 0; i < fade_out_samps; i++)
+
+    for (long i = 0; i < total_samples; i++)
     {
-        long curr_samp = end_time_samps - i;
-        if (curr_samp < 0)
-        {
-            break;
-        }
-        tab[curr_samp] *= i / (float)fade_out_samps;
+        
+        tab[i] = new_samples[i];
     }
-    
+
+    free(new_samples);
     buffer_setdirty(buffer);
     buffer_unlocksamples(buffer);
-    outlet_bang(x->f_outlet1);
+//    outlet_bang(x->f_outlet1);
+    outlet_int(x->f_outlet1, new_samp_count);
     return;
 }
 
 
-// this lets us double-click on fadebuf~ to open up the buffer~ it references
-void fadebuf_dblclick(t_fadebuf *x)
+// this lets us double-click on stripsilence~ to open up the buffer~ it references
+void stripsilence_dblclick(t_stripsilence *x)
 {
     buffer_view(buffer_ref_getobject(x->f_buffer_reference));
 }
 
-void fadebuf_assist(t_fadebuf *x, void *b, long m, long a, char *s)
+void stripsilence_assist(t_stripsilence *x, void *b, long m, long a, char *s)
 {
     if (m == ASSIST_OUTLET)
         sprintf(s,"bang When Buffer Has Been Edited");
@@ -211,9 +221,9 @@ void fadebuf_assist(t_fadebuf *x, void *b, long m, long a, char *s)
     }
 }
 
-void *fadebuf_new(t_symbol *s, long argc, t_atom *argv)
+void *stripsilence_new(t_symbol *s, long argc, t_atom *argv)
 {
-    t_fadebuf *x = object_alloc(fadebuf_class);
+    t_stripsilence *x = object_alloc(stripsilence_class);
     t_symbol *tmp = gensym("");
     switch (argc)
     {
@@ -238,7 +248,7 @@ void *fadebuf_new(t_symbol *s, long argc, t_atom *argv)
         default:
             object_post((t_object *)x, "received too many arguments");
     }
-    fadebuf_set(x, tmp);
+    stripsilence_set(x, tmp);
     x->f_start_time = 0;
     x->f_end_time = -1; // when a bang has been received check to see if end time is -1 in bang; if it is, use buffer length
 
@@ -251,7 +261,7 @@ void *fadebuf_new(t_symbol *s, long argc, t_atom *argv)
 }
 
 
-void fadebuf_free(t_fadebuf *x)
+void stripsilence_free(t_stripsilence *x)
 {
     object_free(x->f_buffer_reference);
     object_free(x->f_proxy1);
@@ -259,7 +269,7 @@ void fadebuf_free(t_fadebuf *x)
     object_free(x->f_proxy3);
 }
 
-t_max_err fadebuf_notify(t_fadebuf *x, t_symbol *s, t_symbol *msg, void *sender, void *data)
+t_max_err stripsilence_notify(t_stripsilence *x, t_symbol *s, t_symbol *msg, void *sender, void *data)
 {
     return buffer_ref_notify(x->f_buffer_reference, s, msg, sender, data);
 }
