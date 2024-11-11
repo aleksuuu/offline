@@ -95,7 +95,7 @@ void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv)
 {
     if (argc != 2)
     {
-        object_post((t_object *)x, "list input must contain two elements");
+        object_error((t_object *)x, "list input must contain two elements");
     }
     switch (proxy_getinlet((t_object *)x))
     {
@@ -113,7 +113,7 @@ void fadebuf_list(t_fadebuf *x, t_symbol *s, long argc, t_atom *argv)
             atom_arg_getdouble(&x->f_end_time, 1, argc, argv);
             break;
         default:
-            object_post((t_object *)x, "inlet does not accept lists");
+            object_error((t_object *)x, "inlet does not accept lists");
             break;
     }
 }
@@ -123,7 +123,7 @@ void fadebuf_bang(t_fadebuf *x)
 {
     if (proxy_getinlet((t_object *)x != 0))
     {
-        object_post((t_object *)x, "bang only works with the leftmost inlet");
+        object_error((t_object *)x, "bang only works with the leftmost inlet");
         return;
     }
     
@@ -131,7 +131,7 @@ void fadebuf_bang(t_fadebuf *x)
     float *tab = buffer_locksamples(buffer);
     if (!tab)
     {
-        object_post((t_object *)x, "buffer is empty");
+        object_error((t_object *)x, "buffer is empty");
         return;
     }
     
@@ -218,7 +218,7 @@ void *fadebuf_new(t_symbol *s, long argc, t_atom *argv)
     switch (argc)
     {
         case 0:
-            object_post((t_object *)x, "requires at least one argument");
+            object_error((t_object *)x, "requires at least one argument");
             break;
         case 1:
             atom_arg_getsym(&tmp, 0, argc, argv);
@@ -236,7 +236,7 @@ void *fadebuf_new(t_symbol *s, long argc, t_atom *argv)
             atom_arg_getdouble(&x->f_fade_out_time, 2, argc, argv);
             break;
         default:
-            object_post((t_object *)x, "received too many arguments");
+            object_error((t_object *)x, "received too many arguments");
     }
     fadebuf_set(x, tmp);
     x->f_start_time = 0;
